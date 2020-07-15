@@ -35,7 +35,7 @@ train_path = 'train'
 test_path = 'test'           
 validate_path = 'valid'
 
-
+#Creating generator for Training DataSet
 train_datagen = ImageDataGenerator(
         preprocessing_function=preprocess_input,
         shear_range=0.1, 
@@ -47,7 +47,7 @@ train_generator = train_datagen.flow_from_directory(
         batch_size=64,
         class_mode='categorical')
 
-
+#Creating generator for Validation DataSet
 val_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 val_generator = val_datagen.flow_from_directory(
         'valid',
@@ -55,7 +55,7 @@ val_generator = val_datagen.flow_from_directory(
         batch_size=32,
         class_mode='categorical')
 
-
+#Creating generator for Test DataSet
 test_datagen = ImageDataGenerator(preprocessing_function=preprocess_input)
 test_generator = test_datagen.flow_from_directory(
         'test',
@@ -63,16 +63,16 @@ test_generator = test_datagen.flow_from_directory(
         batch_size=32,
         class_mode='categorical')
 
-
+#instantiate a base model with pre-trained weigts.
 base_model=keras.applications.VGG16(
     include_top=False,
     weights="imagenet",
     input_shape=(224,224,3))
 
-
+#freeze the base model
 base_model.trainable = False
 
-
+#Create new model on top
 from keras.models import Sequential
 from keras.layers import Dense,Flatten,Dropout
 model=Sequential()
@@ -90,13 +90,14 @@ model.summary()
 model.compile(optimizer=keras.optimizers.Adam(1e-4),loss='categorical_crossentropy',metrics=['accuracy'])
 history=model.fit(train_generator,epochs=50,validation_data=val_generator,workers=10,use_multiprocessing=True)
 
+#Some visualizations
 import matplotlib.pyplot as plt
 #Loss
 plt.plot(history.history['loss'],label='loss')
 plt.plot(history.history['val_loss'],label='val_loss')
 plt.legend()
 plt.show()
-
+#Accuracy
 plt.plot(history.history['accuracy'],label='acc')
 plt.plot(history.history['val_accuracy'],label='val_acc')
 plt.legend()
